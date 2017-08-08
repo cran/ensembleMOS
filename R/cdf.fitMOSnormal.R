@@ -9,7 +9,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
 ## remove instances missing all forecasts or dates
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
-## M <- M | is.na(ensembleDates(ensembleData))
+
  ensembleData <- ensembleData[!M,]
 
  nObs <- nrow(ensembleData)
@@ -28,8 +28,9 @@ function(fit, ensembleData, values, dates = NULL, ...)
  S.sq <- apply(ensembleData,1,var)
  Mu <- A%*%x
  Sig <- sqrt(rep(fit$c,nObs) + rep(fit$d,nObs)*S.sq)
-
- CDF <- pnorm(values, mean = Mu, sd = Sig)
+ for (i in 1:length(values)){
+   CDF[,i] <- pnorm(values[i], mean = Mu, sd = Sig)
+ }
  CDF
 }
 

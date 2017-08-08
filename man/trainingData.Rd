@@ -8,7 +8,7 @@
   to a given date and number of  training days.
 }
 \usage{
-trainingData( ensembleData, trainingDays, consecutive = FALSE, date)
+trainingData(ensembleData, trainingDays, consecutive = FALSE, date)
 }
 \arguments{
   \item{ensembleData}{
@@ -61,22 +61,22 @@ members using Bayesian model averaging, \emph{Monthly Weather Review}
 }
 
 \examples{
-  data(ensMOStest)
+data("ensBMAtest", package = "ensembleBMA")
 
-  ensNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
+ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  tempTestData <- ensembleData( forecasts = ensMOStest[,ensNames],
-                                observations = ensMOStest[,"obs"],
-                                station = ensMOStest[,"station"],
-                                dates = ensMOStest[,"vdate"],
-                                forecastHour = 48,
-                                initializationTime = "00")
+obs <- paste("T2", "obs", sep = ".")
+ens <- paste("T2", ensMemNames, sep = ".")
+tempTestData <- ensembleData(forecasts = ensBMAtest[,ens],
+                             dates = ensBMAtest[,"vdate"],
+                             observations = ensBMAtest[,obs],
+                             station = ensBMAtest[,"station"],
+                             forecastHour = 48,
+                             initializationTime = "00")
 
-  tempTrain <- trainingData( tempTestData, trainingDays = 30,
-                             date  = "2008010100")
+tempTrain <- trainingData(tempTestData, trainingDays = 30,
+                             date = "2008010100")
 
-  tempTrainFit <- fitMOSnormal( tempTrain)
-
+tempTrainFit <- fitMOSnormal(tempTrain)
 }
 \keyword{models}
-% docclass is function

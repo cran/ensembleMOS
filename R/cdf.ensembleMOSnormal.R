@@ -92,6 +92,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
     }
  }
 
+ if (any(is.na(CDF))) warning("NAs in cdf values") 
  CDF
 }
 

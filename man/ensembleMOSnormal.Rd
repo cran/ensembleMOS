@@ -1,20 +1,17 @@
 \name{ensembleMOSnormal}
 \alias{ensembleMOSnormal}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Gaussian (normal) EMOS modeling
 }
 \description{
-  %%  ~~ A concise (1-5 lines) description of what the function does. ~~
   Fits a Gaussian (normal) EMOS model to ensemble forecasts for
   specified dates.
 }
 \usage{
-  ensembleMOSnormal(ensembleData, trainingDays, consecutive = FALSE,
-                    dates = NULL, control = controlMOSnormal(),
-                    warmStart = FALSE, exchangeable = NULL)
+ensembleMOSnormal(ensembleData, trainingDays, consecutive = FALSE,
+                  dates = NULL, control = controlMOSnormal(),
+                  warmStart = FALSE, exchangeable = NULL)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{ensembleData}{
     An \code{ensembleData} object including ensemble forecasts with
@@ -35,8 +32,9 @@
     for which modeling is allowed given the training rule.
 }
   \item{control}{
-    A list of control values for the fitting functions. The defaults are
-    given by the function \link{controlMOSnormal}.
+    A list of control values for the fitting functions specified via the
+    function  \link{controlMOSnormal}. For details
+    and default values, see \link{controlMOSnormal}.
   }
   \item{warmStart}{
     If \code{TRUE}, then starting values for parameters in optimization
@@ -68,19 +66,16 @@
 }
 
 \details{
-  %%  ~~ If necessary, more details than the description above ~~
-  Given an ensemble forecast of size \eqn{m}: \eqn{X_1, \ldots , X_m},  the
-  following Gaussian predictive distribution is fit by
-  \code{ensembleMOSnormal}
+  Given an ensemble of size \eqn{m}: \eqn{X_1, \ldots , X_m},  the
+  following Gaussian model is fit by \code{ensembleMOSnormal}: 
 
-  \deqn{ Y \sim \mathcal{N}
-    \left( a + b_1X_1 + \cdots + b_mX_m , c + dS^2 \right)}
+  \deqn{ Y ~ N(a + b_1 X_1 + ... + b_m X_m , c + dS^2).}
 
   \code{B} is a vector of fitted regression coefficients: \eqn{b_1,
-    \ldots ,b_m}.  Specifically, \eqn{a,b_1,\ldots , b_m, c,d} are
+    \ldots ,b_m}.  Specifically, \eqn{a,b_1,\ldots , b_m, c, d} are
     fitted to optimize
     \code{control$scoringRule} over the specified training period using
-    \code{optim} with \code{method = "BFGS"}.
+    \code{optim} with \code{method = control$optimRule}.
 }
 
 \references{
@@ -89,35 +84,24 @@ Calibrated probabilistic forecasting using ensemble model output
 statistics and minimum CRPS estimation.
 \emph{Monthly Weather Review} 133:1098--1118, 2005.
 }
-%%\author{
-%%  ~~who you are~~
-%%}
-%%\note{
-%%  ~~further notes~~
-%%}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-  %% ~~objects to See Also as \code{\link{help}}, ~~~
   \code{\link{controlMOSnormal}},
   \code{\link{fitMOSnormal}}
 }
 \examples{
+data("ensBMAtest", package = "ensembleBMA")
 
-  data(ensMOStest)
+ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
-
-  tempTestData <- ensembleData( forecasts = ensMOStest[,ensMemNames],
-                                dates = ensMOStest[,"vdate"],
-                                observations = ensMOStest[,"obs"],
-                                station = ensMOStest[,"station"],
-                                forecastHour = 48,
-                                initializationTime = "00")
-
-  tempTestFit <- ensembleMOSnormal( tempTestData, trainingDays = 30)
+obs <- paste("T2", "obs", sep = ".")
+ens <- paste("T2", ensMemNames, sep = ".")
+tempTestData <- ensembleData(forecasts = ensBMAtest[,ens],
+                             dates = ensBMAtest[,"vdate"],
+                             observations = ensBMAtest[,obs],
+                             station = ensBMAtest[,"station"],
+                             forecastHour = 48,
+                             initializationTime = "00")
+                             
+tempTestFit <- ensembleMOSnormal(tempTestData, trainingDays = 25)
 }
-
 \keyword{models}
-

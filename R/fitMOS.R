@@ -7,22 +7,26 @@ function(ensembleData, control = NULL, model = NULL,
  mc$model <- NULL
 
  if (!is.null(model)) {
-   MODELS <- c("normal","truncNormal")
-   m <- pmatch( model, MODELS, nomatch=0)
-   model <- if (m) MODELS[m] else "?"
- }
- else stop("unspecified model")
-
- switch( model,
-        "normal" = {
+   switch( model,
+           "normal" = {
              mc[[1]] <- as.name("fitMOSnormal")
-          },
-        "normal0" = {
-             mc[[1]] <- as.name("fitMOStruncNormal")
-         },
-       stop("unrecognized model")
-    )
-
+           },
+           "truncnormal" = {
+             mc[[1]] <- as.name("fitMOStruncnormal")
+           },
+           "lognormal" = {
+             mc[[1]] <- as.name("fitMOSlognormal")
+           },
+           "csg0" = {
+             mc[[1]] <- as.name("fitMOScsg0")
+           },
+           "gev0" = {
+             mc[[1]] <- as.name("fitMOSgev0")
+           },
+           stop("unrecognized model")
+   )
+ } else stop("unspecified model")
+ 
  if (length(attr(ensembleData, "class")) > 2) {
    attr(ensembleData, "class") <- attr(ensembleData, "class")[-1]
    mc$ensembleData <- ensembleData

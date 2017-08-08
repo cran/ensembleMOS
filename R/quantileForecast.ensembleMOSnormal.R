@@ -92,7 +92,7 @@ function(fit, ensembleData, quantiles = 0.5, dates = NULL, ...)
         Quants[i,] <- qnorm(quantiles, mean = Mu, sd=Sig)
     }
  }
-
+ if (any(is.na(Quants))) warning("NAs in quantiles values") 
  Quants
 }
 

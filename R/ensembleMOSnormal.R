@@ -26,7 +26,7 @@ function(ensembleData, trainingDays, consecutive = FALSE, dates = NULL,
  exchangeable <- getExchangeable( exchangeable,
                                  ensembleGroups(ensembleData),nForecasts)
 
-# remove instances missing all forecasts, obs or dates
+## Remove instances missing all forecasts, obs or dates
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
  M <- M | is.na(ensembleVerifObs(ensembleData))
@@ -130,8 +130,6 @@ function(ensembleData, trainingDays, consecutive = FALSE, dates = NULL,
  L <- length(juliandates)
  twin <- 1:trainingDays
 
-## temp <- data.frame(julian = julianDATES,date = DATES)
-## print(temp)
 
  cat("\n")
 
@@ -174,7 +172,11 @@ function(ensembleData, trainingDays, consecutive = FALSE, dates = NULL,
     a[i] <- fit$a
     B[,i] <- fit$B
     if (warmStart) {
-      control$start <- list(a = fit$a, B = fit$B, c = fit$c, d = fit$d)
+      if (is.null(exchangeable)){
+        control$start <- list(a = fit$a, B = fit$B, c = fit$c, d = fit$d)
+      }else {
+        control$start <- list(a = fit$a, B = aggregate(fit$B, by=list(exchangeable),mean)[,2], c = fit$c, d = fit$d)
+      }
     }
     cat("\n")
     print(round(c(fit$a, fit$B),2))
@@ -186,7 +188,9 @@ function(ensembleData, trainingDays, consecutive = FALSE, dates = NULL,
  structure(list(training = c(days = trainingDays, lag = lag,
                 table = trainTable),
 		a = a, B = B, c = c, d = d,
-                exchangeable = attr(ensembleData, "exchangeable")),
+                exchangeable = exchangeable),
+            		forecastHour = attr(ensembleData, "forecastHour"),
+		            initializationTime = attr(ensembleData, "initializationTime"),
                 call = match.call(), class = "ensembleMOSnormal")
 }
 

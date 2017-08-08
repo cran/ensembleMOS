@@ -1,10 +1,8 @@
 crps.fitMOSnormal <-
-function(fit, ensembleData, dates=NULL, nSamples = NULL, seed=NULL,  ...)
+function(fit, ensembleData, dates=NULL, ...)
 {
 
  if(!is.null(dates)) warning("dates ignored")
-
- #erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
  crpsFunc <- function(mu, sig, y)
   {
@@ -26,20 +24,31 @@ function(fit, ensembleData, dates=NULL, nSamples = NULL, seed=NULL,  ...)
  if (is.null(obs <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
 
-#nObs <- length(obs)
  nObs <- ensembleNobs(ensembleData)
-
- if (!is.null(seed)) set.seed(seed)
 
  nForecasts <- ensembleSize(ensembleData)
 
- CRPS <- crpsSim <- sampleMedian <- rep(NA, nObs)
- names(crpsSim) <- names(sampleMedian) <- ensembleObsLabels(ensembleData)
-
- members <- ensembleMemberLabels(ensembleData)
-
+ CRPS <- rep(NA, nObs)
+ 
  obs <- ensembleVerifObs(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
+ 
+ crpsEns1 <- apply(abs(sweep(ensembleData, MARGIN=1,FUN ="-",STATS=obs))
+                   ,1,mean,na.rm=TRUE)
+ 
+ if (nrow(ensembleData) > 1) {
+   crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
+     apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
+     Z = ensembleData),1,sum, na.rm = TRUE)
+ }
+ else {
+   crpsEns2 <- sum(sapply(as.vector(ensembleData), 
+                          function(z,Z) sum( Z-z, na.rm = TRUE),
+                          Z = as.vector(ensembleData)), na.rm = TRUE)
+ }
+ 
+ crpsEns <- crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts))
+ 
 
  B <- fit$B
 
@@ -62,6 +71,6 @@ function(fit, ensembleData, dates=NULL, nSamples = NULL, seed=NULL,  ...)
    }
 
 }
-CRPS
+ cbind(ensemble = crpsEns, EMOS = CRPS)
 }
 

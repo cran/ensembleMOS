@@ -1,7 +1,6 @@
 `getHH` <-
 function (YYYYMMDDHH)
 {
- if (!exists("chron")) library("chron")
  YYYYMMDDHH <- sapply(YYYYMMDDHH, as.character)
  l <- sapply(YYYYMMDDHH, nchar)
  if (any(I <- (l > 10 | l == 9 | l < 8))) stop("invalid date string")

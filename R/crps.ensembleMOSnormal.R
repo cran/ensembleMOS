@@ -1,5 +1,5 @@
 crps.ensembleMOSnormal <-
-function(fit, ensembleData, dates=NULL, nSamples=10000, seed=NULL, ...)
+function(fit, ensembleData, dates=NULL, ...)
 {
  crpsFunc <- function(mu, sig, y)
   {
@@ -66,17 +66,29 @@ function(fit, ensembleData, dates=NULL, nSamples=10000, seed=NULL, ...)
    nObs <- length(Dates)
  }
 
- Q <- as.vector(quantileForecast(fit, ensembleData, dates = dates))
- if (any(is.na(Q))) stop("NAs in forecast") # fix like ensembleBMAgamma0
-
+ 
  obs <- ensembleVerifObs(ensembleData)
  nForecasts <- ensembleSize(ensembleData)
- members <- ensembleMemberLabels(ensembleData)
 
- CRPS <- crpsSim <- sampleMedian <- rep(NA, nObs)
- names(crpsSim) <- names(sampleMedian) <- ensembleObsLabels(ensembleData)
-
+ CRPS <- rep(NA, nObs)
+ 
  ensembleData <- ensembleForecasts(ensembleData)
+ 
+ crpsEns1 <- apply(abs(sweep(ensembleData, MARGIN=1,FUN ="-",STATS=obs))
+                   ,1,mean,na.rm=TRUE)
+ 
+ if (nrow(ensembleData) > 1) {
+   crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
+     apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
+     Z = ensembleData),1,sum, na.rm = TRUE)
+ }
+ else {
+   crpsEns2 <- sum(sapply(as.vector(ensembleData), 
+                          function(z,Z) sum( Z-z, na.rm = TRUE),
+                          Z = as.vector(ensembleData)), na.rm = TRUE)
+ }
+ 
+ crpsEns <- crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts))
 
  l <- 0
  for (d in dates) {
@@ -104,6 +116,9 @@ function(fit, ensembleData, dates=NULL, nSamples=10000, seed=NULL, ...)
        CRPS[i] <- crpsFunc(Mu, Sig, obs[i])
     }
 }
-CRPS
+ 
+ if (any(is.na(c(crpsEns,CRPS)))) warning("NAs in crps values") 
+ 
+ cbind(ensemble = crpsEns, EMOS = CRPS)
 }
 

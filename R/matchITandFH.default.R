@@ -12,9 +12,9 @@ function( fit, ensembleData)
  
  fitFH <- naNULL(attr(fit, "forecastHour"))
  fitIT <- naNULL(attr(fit, "initializationTime"))
- datFH <- naNULL(attr(fit, "forecastHour"))
- datIT <- naNULL(attr(fit, "initializationTime"))
-
+ datFH <- naNULL(attr(ensembleData, "forecastHour"))
+ datIT <- naNULL(attr(ensembleData, "initializationTime"))
+ 
  out <- TRUE
 
  if (fitFH != datFH & fitIT != datIT) {

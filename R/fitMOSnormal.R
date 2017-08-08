@@ -26,7 +26,7 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
       v <- var(x, na.rm = TRUE)
   }
 
-  # remove instances missing all forecasts or obs
+  ### Remove instances missing all forecasts or obs
   M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
   M <- M | is.na(ensembleVerifObs(ensembleData))
   ensembleData <- ensembleData[!M,]
@@ -44,6 +44,8 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
   if (length(unique(exchangeable)) == length(exchangeable))
       exchangeable <- NULL
   nEX <- 2
+  
+  ### Exchangeable groups
   if (!(nullX <- is.null(exchangeable))) {
       ### Helper function to name exchangeable Groups
       "catStrings" <- function(strings) {
@@ -91,17 +93,10 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
     ensembleEX <- cbind(matEX,
                         dates = ensembleData$dates[D],
                         observations = ensembleData$obs[D])
-    #if(!is.null(ensembleData$lat[D]){
-    #     ensembleEX <- cbind(ensembleEX,latitude = ensembleData$lat[D])
-    #}
-    #if(!is.null(ensembleData$lat[D]){
-    #     ensembleEX <- cbind(ensembleEX,latitude = ensembleData$lat[D])
-    #}
-    #if(!is.null(ensembleData$lon[D]){
-    #
-    #}
 
   }
+   
+  
   if(nullX) {
     fitData <- rmNArows(ensembleData)
   }else{
@@ -118,11 +113,13 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
   fitForecasts <- ensembleForecasts(fitData)
   obs <- ensembleVerifObs(fitData)
   xTrain <- cbind(rep(1,length(obs)),fitForecasts)
-  if(nEX > 1){
+  
+  if (nullX) {
       var <- apply(fitForecasts,1,varNA)
   }else{
       var <- apply(ensembleForecasts(ensembleData)[D,],1,varNA)
   }
+ 
 
   if(any(is.null(c(control$start$c, control$start$d)))) {
       control$start$c <- 5
@@ -133,7 +130,6 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
     control$start$a <- olsCoefs[1]
     B <- olsCoefs[-1]
     if(control$coefRule == "square") {
-    #B[B<0] <- rep(0,length(B[B<0]))
     control$start$B <- sqrt(abs(B))
     }else control$start$B <- B
   }
@@ -143,7 +139,7 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
   pars <- c(c, sqrt(control$start$d), control$start$a,
      control$start$B)
 
-# optimize pars on chosen scoring rule
+### Optimize pars on chosen scoring rule
 
   switch(control$scoringRule,
          crps = {
@@ -164,17 +160,6 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
       sum(crps)
   }
                   },
-         mae = {
-
-  objectiveFUN <- function(pars) {
-      mean(abs(obs - xTrain%*%pars[-c(1:2)]))
-  }
-                 },
-         mse = {
-  objectiveFUN <- function(pars) {
-      mean((obs - xTrain%*%pars[-c(1:2)])^2)
-  }
-                 },
          log = {
 
   objectiveFUN <- function(pars) {
@@ -191,8 +176,8 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
   }
                   }
   )
-
-  opt <- optim(pars, fn=objectiveFUN, method="BFGS",
+ 
+  opt <- optim(pars, fn=objectiveFUN, method=control$optimRule,
                control=list(maxit=control$maxIter))
 
   optB <- opt$par[-c(1:3)]
@@ -200,7 +185,6 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
   if(nullX) {
       B <- optB
   }else{
-   #browser()
    for(i in 1:nEX) {
       B[splitEX[[i]]] <- optB[i]
    }
@@ -216,7 +200,7 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
       if (control$varRule == "square") {
           opt$par[1] <- opt$par[1]^2
       }
-      fit <- structure(list(#sd = c(opt$par[1],  opt$par[2]^2),
+      fit <- structure(list(
                             a = opt$par[3], B = B,
                             c = opt$par[1], d = opt$par[2]^2,
                             exhangeable = exchangeable),
@@ -226,7 +210,7 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
       if(control$varRule == "positive") {
           opt$par[1] <- opt$par[1]^2
       }
-      fit <- structure( list(#sd = c(opt$par[1],  opt$par[2]^2),
+      fit <- structure( list(
                              a = opt$par[3], B = B,
                              c = opt$par[1], d = opt$par[2]^2,
                              exhangeable = exchangeable),
@@ -263,7 +247,7 @@ function(ensembleData, control = controlMOSnormal(), exchangeable = NULL)
       if (control$varRule == "square") {
           opt$par[1] <- opt$par[1]^2
       }
-      fit <- structure( list(#sd = c(opt$par[1], opt$par[2]^2),
+      fit <- structure( list(
                              a = opt$par[3], B = B,
                              c = opt$par[1], d = opt$par[2]^2,
                              exhangeable = exchangeable),
