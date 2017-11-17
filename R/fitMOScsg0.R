@@ -184,7 +184,7 @@ function(ensembleData, control = controlMOScsg0(), exchangeable = NULL)
       Z <- (obs + pars[1]^2)/Scl
       C <- pars[1]^2/Scl     
       
-      ign <- -log(pgamma(C,Shp,1)) * (obs==0) -log((1-pgamma(C,Shp,1))*dgamma(Z,Shp,1)/Scl) * (obs>0)
+      ign <- -log(pgamma(C,Shp,1)) * (obs==0) -log(dgamma(Z,Shp,1)/Scl) * (obs>0)
      
       return(sum(ign,na.rm=T))
       
