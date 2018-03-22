@@ -14,13 +14,13 @@ function(ensembleData, control = controlMOSgev0(), exchangeable = NULL)
    x <- x[!M,]
    return(x)
   }
-
   "impute" <- function(x)
   {
-   M <- apply(x,1,function(z) any(is.na(z)))
-   Mu <- apply(x[M,],1, mean, na.rm=TRUE)
-   x[is.na(x)] <- Mu
-   return(x)
+    M <- apply(x, 1, anyNA)
+    for(row in which(M)){
+      x[row,which(is.na(x[row,]))  ] <- mean(x[row,], na.rm = TRUE)
+    }
+    return(x)
   }
   "varNA" <- function(x){
       v <- var(x, na.rm = TRUE)

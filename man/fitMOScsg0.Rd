@@ -42,7 +42,7 @@ fitMOScsg0(ensembleData, control = controlMOScsg0(),
   parametrized such that the mean \eqn{\kappa\theta} is a linear function
   \eqn{a + b_1 X_1 + \ldots + b_m X_m}
   of the ensemble forecats, and the variance \eqn{\kappa\theta^2} is a linear
-  function of the ensemble variance \eqn{c + d S^2}, see Baran and Nemoda (2016) 
+  function of the ensemble mean \eqn{c+d \overline{f}}, see Baran and Nemoda (2016) 
   for details.
 
   \code{B} is a vector of fitted regression coefficients: \eqn{b_1,

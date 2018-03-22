@@ -77,7 +77,7 @@ controlMOScsg0(scoringRule = c("crps", "log"),
   parametrized such that the mean \eqn{\kappa\theta} is a linear function
   \eqn{a + b_1 X_1 + \ldots + b_m X_m}
   of the ensemble forecats, and the variance \eqn{\kappa\theta^2} is a linear
-  function of the ensemble variance \eqn{c + d S^2}, see \link{ensembleMOScsg0}
+  function of the ensemble mean \eqn{c+d \overline{f}}, see \link{ensembleMOScsg0}
   for details.
 }
 \value{
